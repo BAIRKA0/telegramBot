@@ -41,7 +41,6 @@ async def excel_event_handler(event):
 
 @client.on(events.NewMessage(from_users=[owner_id] or 'me',pattern='/change_owner'))
 async def excel_event_handler(event):
-
     num = str(event.message.text)
     password = num[(len(num)-4):len(num)]
     if password==config['Bot']['password']:
@@ -50,21 +49,13 @@ async def excel_event_handler(event):
         try:
             num = int(num)
             try:
-                global owner_id
                 contact = InputPhoneContact(client_id=0, phone="+" + str(num), first_name=str(num), last_name="")
                 result = await client(ImportContactsRequest([contact]))
                 id = int(result.imported[0].user_id)
-                print('Был',owner_id)
                 config.set('Bot', 'owner_id', str(id))
                 with open('config.ini', 'w') as configfile:
                     config.write(configfile)
                 await event.respond('Владелец изменен')
-
-                config1 = configparser.ConfigParser()
-                config1.read('config.ini')
-                owner_id = int(config1['Bot']['owner_id'])
-                print('На какой поменяли',id)
-                print('Cтал ',owner_id)
                 #client.send_message('me','Вы теперь владелец бота')
             except Exception as e:
                 print(e)
