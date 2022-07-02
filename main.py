@@ -37,7 +37,8 @@ async def excel_event_handler(event):
                     '\n/run - приглашение пользователей в канал, в котором написали команду'
                     '\n/add - добавление номера в excel (пример: /add 7xxxxxxxxxx)'
                     '\n/del - Удаление номера из excel (пример: /del 7xxxxxxxxxx)'
-                    '\n/change_owner - меняет владельца бота и в конце нужно указать пароль (пример /change_owner 7xxxxxxxxxx 1234)')
+                    '\n/change_owner - меняет владельца бота и в конце нужно указать пароль (пример /change_owner 7xxxxxxxxxx 1234)'
+                    '\n/channel - изменение id канала, в который нужно пригласить пользователей (пример /channel channel_name)')
 
 @client.on(events.NewMessage(from_users=[owner_id] or 'me',pattern='/change_owner'))
 async def excel_event_handler(event):
@@ -64,6 +65,23 @@ async def excel_event_handler(event):
             await event.respond('Неправильный номер')
     else:
         await event.respond('Неправильный пароль')
+
+@client.on(events.NewMessage(from_users=[owner_id] or 'me',pattern='/channel'))
+async def excel_event_handler(event):
+    channel = str(event.message.text)
+    channel = channel.replace('/channel ', '')
+    ch_id = None
+    async for dialog in client.iter_dialogs():
+        if dialog.name == channel:
+            ch_id = str(dialog.id)
+            break
+    ch_id = ch_id.replace('-100','')
+    config.set('Bot','channel_id',str(ch_id))
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
+    await event.respond('Канал изменен')
+    print(ch_id)
+
 
 @client.on(events.NewMessage(pattern='/run'))
 async def excel_event_handler(event):
